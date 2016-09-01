@@ -1,0 +1,5 @@
+upload_folder = 'upload/'
+token = ''
+token_key = ''
+con_secret = ''
+con_secret_key = ''
