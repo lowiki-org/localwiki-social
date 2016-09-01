@@ -54,6 +54,6 @@ def post_to_twitter(message, file_list, coordinates=None):
         r = t.statuses.update(status=message)
     # flash(r)
 
-if __name__ == "__main__":
 
-    app.run()
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=3000)
