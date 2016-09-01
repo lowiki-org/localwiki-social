@@ -3,6 +3,8 @@ from flask.ext.uploads import UploadSet, IMAGES, patch_request_class
 
 from twitter import Twitter, OAuth
 
+import os
+
 app = Flask(__name__)
 
 
@@ -25,25 +27,30 @@ def upload():
 
 
 def post_to_twitter(message, file_list, coordinates=None):
-    auth = OAuth(app.config['token'],
-                 app.config['token_key'],
-                 app.config['con_secret'],
-                 app.config['con_secret_key'])
+    auth = OAuth(app.config['TOKEN'],
+                 app.config['TOKEN_KEY'],
+                 app.config['CON_SECRET'],
+                 app.config['CON_SECRET_KEY'])
 
     t = Twitter(auth=auth)
     t_upload = Twitter(domain='upload.twitter.com', auth=auth)
     image_list = []
 
     for filename in file_list:
-        with open (filename, "rb") as imagefile:
+        path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], filename)
+        with open (path, "rb") as imagefile:
             image = imagefile.read()
             if image:
                 image_id = t_upload.media.upload(media=image)["media_id_string"]
                 image_list.append(image_id)
 
     # "geo": { "type":"Point", "coordinates":[37.78217, -122.40062] }
-    t.statuses.update(status=message, media_ids=",".join(image_list))
 
+    if len(image_list):
+        r = t.statuses.update(status=message, media_ids=",".join(image_list))
+    else:
+        r = t.statuses.update(status=message)
+    # flash(r)
 
 if __name__ == "__main__":
     app.config.from_pyfile('localsettings.cfg')
