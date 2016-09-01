@@ -1,14 +1,17 @@
-<!doctype html>
-<title>Post to twitter</title>
-<h1>發生了什麼事</h1>
-{% block body %}
+{% extends "bootstrap/base.html" %}
+{% block title %}發生了什麼事{% endblock %}
+
 {% if error %}
+  {% block error %}
     <p class=error><strong>Error:</strong> {{ error }}
+  {% endblock %}
 {% endif %}
+
+{% block body %}
   <form action="{{ url_for('add') }}" method=post enctype=multipart/form-data >
     <dl>
       <dt>說明:
-      <dd><input type=text name=message style="font-size: 14pt; height: 40px; width:280px;">
+      <dd><input type=text name=message>
       <dt>附圖(可選):
         <dd><input type=file name=image-1>
         <dd><input type=file name=image-2>

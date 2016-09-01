@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, flash
 from flask.ext.uploads import UploadSet, IMAGES, patch_request_class, configure_uploads
+from flask_bootstrap import Bootstrap
 
 from twitter import Twitter, OAuth
 
@@ -7,6 +8,7 @@ import os
 
 app = Flask(__name__)
 app.config.from_pyfile('localsettings.cfg')
+Bootstrap(app)
 photos = UploadSet('photos', IMAGES)
 configure_uploads(app, (photos,))
 # Limit image size
