@@ -1,29 +1,31 @@
 from flask import Flask, request, render_template, flash
-from flask.ext.uploads import UploadSet, IMAGES, patch_request_class
+from flask.ext.uploads import UploadSet, IMAGES, patch_request_class, configure_uploads
 
 from twitter import Twitter, OAuth
 
 import os
 
 app = Flask(__name__)
+app.config.from_pyfile('localsettings.cfg')
+photos = UploadSet('photos', IMAGES)
+configure_uploads(app, (photos,))
+# Limit image size
+patch_request_class(app, 5 * 1024 * 1024)
 
 
 @app.route("/", methods=['POST', 'GET'])
 def add():
+    if request.method == 'POST' and request.form['message']:
+        m = request.form['message']
+        l = []
+        for name in ('image-1', 'image-2', 'image-3'):
+            image = request.files[name]
+            if image:
+                l.append(photos.save(image))
+
+        post_to_twitter(m, l)
+
     return render_template('add.html')
-
-
-@app.route('/upload', methods=['GET', 'POST'])
-def upload():
-    error = None
-    photos = UploadSet(app.config['upload_folder'], IMAGES)
-    if request.method == 'POST' and request.message:
-        filename = photos.save(request.files['photo'])
-        rec = Photo(filename=filename, user=g.user.id)
-        rec.store()
-        flash("Photo saved.")
-        return redirect(url_for('show', id=rec.id))
-    return render_template('upload.html', error=error)
 
 
 def post_to_twitter(message, file_list, coordinates=None):
@@ -53,7 +55,5 @@ def post_to_twitter(message, file_list, coordinates=None):
     # flash(r)
 
 if __name__ == "__main__":
-    app.config.from_pyfile('localsettings.cfg')
-    patch_request_class(app, 5 * 1024 * 1024)
 
     app.run()
