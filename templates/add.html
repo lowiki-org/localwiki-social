@@ -2,7 +2,26 @@
 {% block title %}發生了什麼事{% endblock %}
 
 {% block body %}
-  <form action="{{ url_for('add') }}" method=post enctype=multipart/form-data >
+
+{% block scripts %}
+<script type="text/javascript">
+  function getLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(addPositionHandler);
+    }
+  };
+  function addPositionHandler(position) {
+    var crd = position.coords;
+    document.getElementById("lat").value = crd.latitude;
+    document.getElementById("long").value = crd.longitude;
+  };
+  window.onload = function() {
+    getLocation();
+  };
+</script>
+{% endblock %}
+
+  <form method=post enctype=multipart/form-data action="{{ url_for('add') }}">
     <dl>
       <dt>說明:
       <dd><input type=text name=message>
@@ -11,6 +30,8 @@
         <dd><input type=file name=image-2>
         <dd><input type=file name=image-3>
     </dl>
+    <input type=hidden id=lat name=lat>
+    <input type=hidden id=long name=long>
     <p><input type=submit value="送出">
   </form>
 
@@ -23,4 +44,5 @@
       </ul>
     {% endif %}
   {% endwith %}
+
 {% endblock %}

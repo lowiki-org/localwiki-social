@@ -25,7 +25,7 @@ def add():
             if image:
                 l.append(photos.save(image))
 
-        e, mp = post_to_twitter(m, l)
+        e, mp = post_to_twitter(m, l, request.form['lat'], request.form['long'])
         if e:
             app.logger.error(e)
             flash(e, 'error')
@@ -36,7 +36,7 @@ def add():
     return render_template('add.html')
 
 
-def post_to_twitter(message, file_list, coordinates=None):
+def post_to_twitter(message, file_list, lat=None, lng=None):
     auth = OAuth(app.config['TOKEN'],
                  app.config['TOKEN_KEY'],
                  app.config['CON_SECRET'],
@@ -44,8 +44,8 @@ def post_to_twitter(message, file_list, coordinates=None):
 
     t = Twitter(auth=auth)
     t_upload = Twitter(domain='upload.twitter.com', auth=auth)
-    image_list = []
 
+    image_list = []
     for filename in file_list:
         path = os.path.join(app.config['UPLOADED_PHOTOS_DEST'], filename)
         with open (path, "rb") as imagefile:
@@ -54,15 +54,20 @@ def post_to_twitter(message, file_list, coordinates=None):
                 image_id = t_upload.media.upload(media=image)["media_id_string"]
                 image_list.append(image_id)
 
-    # "geo": { "type":"Point", "coordinates":[37.78217, -122.40062] }
+    # Prepare data to post to twitter
+    kwargs = {}
+    kwargs['status'] = message
+    if len(image_list):
+        kwargs['media_ids'] = ",".join(image_list)
+    if lat and lng:
+        kwargs['lat'] = float(lat)
+        kwargs['long'] = float(lng)
+        app.logger.info("Post location %s,%s" % (lat, lng))
 
     error = None
     response = None
     try:
-        if len(image_list):
-            r = t.statuses.update(status=message, media_ids=",".join(image_list))
-        else:
-            r = t.statuses.update(status=message)
+        r = t.statuses.update(**kwargs)
         response = "Post success"
         app.logger.info("Post id %s" % r['id'])
     except TwitterError as e:
