@@ -76,4 +76,11 @@ def post_to_twitter(message, file_list, coordinates=None):
     return (error, response)
 
 if __name__ == "__main__":
+    log_path = app.config['LOG']
+    if log_path:
+        import logging
+        from logging.handlers import RotatingFileHandler
+        handler = RotatingFileHandler(log_path, maxBytes=10000, backupCount=1)
+        handler.setLevel(logging.INFO)
+        app.logger.addHandler(handler)
     app.run(host='0.0.0.0', port=3000)
