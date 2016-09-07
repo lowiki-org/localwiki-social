@@ -1,12 +1,6 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}發生了什麼事{% endblock %}
 
-{% if error %}
-  {% block error %}
-    <p class=error><strong>Error:</strong> {{ error }}
-  {% endblock %}
-{% endif %}
-
 {% block body %}
   <form action="{{ url_for('add') }}" method=post enctype=multipart/form-data >
     <dl>
@@ -19,4 +13,14 @@
     </dl>
     <p><input type=submit value="送出">
   </form>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class=flashes>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
 {% endblock %}

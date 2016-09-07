@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, flash
 from flask.ext.uploads import UploadSet, IMAGES, patch_request_class, configure_uploads
 from flask_bootstrap import Bootstrap
 
-from twitter import Twitter, OAuth
+from twitter import Twitter, OAuth, TwitterError
 
 import os
 
@@ -25,7 +25,13 @@ def add():
             if image:
                 l.append(photos.save(image))
 
-        post_to_twitter(m, l)
+        e, mp = post_to_twitter(m, l)
+        if e:
+            app.logger.error(e)
+            flash(e, 'error')
+        else:
+            app.logger.info(mp)
+            flash(mp)
 
     return render_template('add.html')
 
@@ -50,12 +56,24 @@ def post_to_twitter(message, file_list, coordinates=None):
 
     # "geo": { "type":"Point", "coordinates":[37.78217, -122.40062] }
 
-    if len(image_list):
-        r = t.statuses.update(status=message, media_ids=",".join(image_list))
-    else:
-        r = t.statuses.update(status=message)
-    # flash(r)
+    error = None
+    response = None
+    try:
+        if len(image_list):
+            r = t.statuses.update(status=message, media_ids=",".join(image_list))
+        else:
+            r = t.statuses.update(status=message)
+        response = "Post success"
+        app.logger.info("Post id %s" % r['id'])
+    except TwitterError as e:
+        app.logger.error(e)
+        error_message = e.response_data['errors'][0]['message']
+        if error_message:
+            error = "Error, %s" % error_message
+        else:
+            error = "Error on post"
 
+    return (error, response)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=3000)
