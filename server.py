@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, flash
-from flask.ext.uploads import UploadSet, IMAGES, patch_request_class, configure_uploads
+from flask_uploads import UploadSet, IMAGES, patch_request_class, configure_uploads
 from flask_bootstrap import Bootstrap
 
 from twitter import Twitter, OAuth, TwitterError
