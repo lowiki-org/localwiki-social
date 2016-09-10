@@ -20,7 +20,7 @@ def add():
     if request.method == 'POST' and request.form['message']:
         m = request.form['message']
         l = []
-        for name in ('image-1', 'image-2', 'image-3'):
+        for name in ('image-1', 'image-2', 'image-3', 'image-4'):
             image = request.files[name]
             if image:
                 l.append(photos.save(image))
