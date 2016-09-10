@@ -25,7 +25,11 @@ def add():
             if image:
                 l.append(photos.save(image))
 
-        e, mp = post_to_twitter(m, l, request.form['lat'], request.form['long'])
+        e, mp = post_to_twitter(m,
+                                l,
+                                request.form['region'],
+                                request.form['lat'],
+                                request.form['long'])
         if e:
             app.logger.error(e)
             flash(e, 'error')
@@ -33,10 +37,10 @@ def add():
             app.logger.info(mp)
             flash(mp)
 
-    return render_template('add.html')
+    return render_template('add.html', region=request.args.get('region', ''))
 
 
-def post_to_twitter(message, file_list, lat=None, lng=None):
+def post_to_twitter(message, file_list, region="", lat=None, lng=None):
     auth = OAuth(app.config['TOKEN'],
                  app.config['TOKEN_KEY'],
                  app.config['CON_SECRET'],
@@ -56,7 +60,11 @@ def post_to_twitter(message, file_list, lat=None, lng=None):
 
     # Prepare data to post to twitter
     kwargs = {}
-    kwargs['status'] = message
+    if len(region):
+        kwargs['status'] = "%s #%s" % (message, region)
+    else:
+        kwargs['status'] = message
+
     if len(image_list):
         kwargs['media_ids'] = ",".join(image_list)
     if lat and lng:
