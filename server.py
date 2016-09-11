@@ -1,8 +1,9 @@
-from flask import Flask, request, render_template, flash
+from flask import Flask, request, render_template, flash, redirect
 from flask_uploads import UploadSet, IMAGES, patch_request_class, configure_uploads
 from flask_bootstrap import Bootstrap
 
 from twitter import Twitter, OAuth, TwitterError
+from user_agents import parse
 
 import os
 
@@ -17,7 +18,13 @@ patch_request_class(app, 5 * 1024 * 1024)
 
 @app.route("/", methods=['POST', 'GET'])
 def add():
-    if request.method == 'POST' and request.form['message']:
+    if request.method == 'GET':
+        if not request.args.get('debug', ''):
+            ua_string = request.headers.get('User-Agent')
+            user_agent = parse(ua_string)
+            if user_agent.is_pc : return redirect('https://lowiki.tw')
+
+    elif request.method == 'POST' and request.form['message']:
         m = request.form['message']
         l = []
         for name in ('image-1', 'image-2', 'image-3', 'image-4'):
