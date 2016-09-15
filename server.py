@@ -47,7 +47,7 @@ def add():
     return render_template('add.html', region=request.args.get('region', ''))
 
 
-def post_to_twitter(message, file_list, region="", lat=None, lng=None):
+def post_to_twitter(message, file_list, hashtag="", lat=None, lng=None):
     auth = OAuth(app.config['TOKEN'],
                  app.config['TOKEN_KEY'],
                  app.config['CON_SECRET'],
@@ -67,8 +67,8 @@ def post_to_twitter(message, file_list, region="", lat=None, lng=None):
 
     # Prepare data to post to twitter
     kwargs = {}
-    if len(region):
-        kwargs['status'] = "%s #%s" % (message, region)
+    if len(hashtag):
+        kwargs['status'] = "%s #%s" % (message, hashtag)
     else:
         kwargs['status'] = message
 
