@@ -103,4 +103,4 @@ if __name__ == "__main__":
         handler = RotatingFileHandler(log_path, maxBytes=10000, backupCount=1)
         handler.setLevel(logging.INFO)
         app.logger.addHandler(handler)
-    app.run(host='0.0.0.0', port=3000)
+    app.run(host=app.config['LISTEN'], port=app.config['PORT'])
